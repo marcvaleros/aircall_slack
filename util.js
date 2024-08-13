@@ -1,15 +1,12 @@
-const axios = require('axios');
 require('dotenv').config();
+const axios = require('axios');
+const FormData = require('form-data');
 
 const token = process.env.HUBSPOT_API_KEY;
+const slack_token = process.env.SLACK_TOKEN;
 const baseURL = 'https://api.hubapi.com/';
 const endpoint = 'crm/v3/objects/companies/search';
 
-
-const uploadFileToSlack = (data) => {      //returns true if the file is already uploaded
-
-  data.aircall_data.recording
-}
 
 //search for a specific company using their phone number
 const findCompany = async (query) => {

@@ -28,7 +28,7 @@ app.post('/webhook', async (req, res) => {
         const data = await getAircallHubspotData(body); 
         
         if(data){                  
-          if(data.aircall_data.duration > 120){
+          if(data.aircall_data.duration > 10){
             console.log("Recording Above Two Minutes");
 
             try {
