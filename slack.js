@@ -11,15 +11,18 @@ var endpoint = 'crm/v3/objects/companies/search';
 
 const uploadFileToSlack = (data) => {      //returns true if the file is already uploaded
   const url = data.aircall_data.recording;
+  const companyId = data.hubspot_id;
   const companyName = data.hubspot_properties.name;
   const dot = data.hubspot_properties.dot_number;
   const user_name = data.aircall_data.user.name;
+  const phone = data.aircall_data.raw_digits;
+  const duration = data.aircall_data.duration;
 
-  const res = getUploadURL(url, companyName, dot, user_name);
+  const res = getUploadURL(url, companyName, dot, user_name,phone,companyId, duration);
   return res;
 }
 
-const getUploadURL = async (url, companyName, dot, user_name) => {
+const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, duration) => {
   try {
     // Fetch the file from the URL
     const response = await axios.get(url, {
@@ -63,7 +66,7 @@ const getUploadURL = async (url, companyName, dot, user_name) => {
     
           if (uploadRes.status === 200) {
             console.log(uploadRes.data);
-            await completeUploadToSlack(slackData.file_id, companyName, dot, user_name);
+            await completeUploadToSlack(slackData.file_id, companyName, dot, user_name, phone, companyId, duration);
             console.log('Success ');
     
           } else {
@@ -85,7 +88,7 @@ const getUploadURL = async (url, companyName, dot, user_name) => {
   }
 } 
 
-async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name) {
+async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone,companyId, duration) {
   const payload = {
     files: [
       {
@@ -94,7 +97,13 @@ async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name
       }
     ],
     channel_id: process.env.SLACK_CHANNEL_ID,
-    initial_comment: `Recording by ${aircall_user_name}.\nCompany: ${companyName}.\nDOT#${dot}`
+    initial_comment:
+    `Team Member: ${aircall_user_name}\n
+    Company: ${companyName}.\n
+    Phone#${phone}\n
+    DOT#${dot}\n
+    Hubspot Link:${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\n
+    Call Length: ${convertSecsToMins(duration)}\n`
   };
 
   try {
@@ -110,6 +119,12 @@ async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name
     console.error('Complete Upload Failed!');
     console.error(error.message);
   }
+}
+
+function convertSecsToMins(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes} min ${remainingSeconds} sec`;
 }
 
 module.exports = {
