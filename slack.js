@@ -98,12 +98,7 @@ async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name
     ],
     channel_id: process.env.SLACK_CHANNEL_ID,
     initial_comment:
-    `Team Member: ${aircall_user_name}\n
-    Company: ${companyName}.\n
-    Phone#${phone}\n
-    DOT#${dot}\n
-    Hubspot Link:${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\n
-    Call Length: ${convertSecsToMins(duration)}\n`
+    `Team Member: ${aircall_user_name}\nCompany: ${companyName}.\nPhone: ${phone}\nDOT: ${dot}\nHubspot Link: ${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\nCall Length: ${convertSecsToMins(duration)}\n`
   };
 
   try {
