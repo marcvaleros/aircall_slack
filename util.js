@@ -107,6 +107,5 @@ const formatPhoneNumber = (phoneNumber) => {
 module.exports = {
     findCompany,
     getAircallHubspotData,
-    uploadFileToSlack
 };
 

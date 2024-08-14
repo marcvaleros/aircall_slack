@@ -1,7 +1,7 @@
-// const { App } = require('@slack/bolt');
 require('dotenv').config();
 const express = require('express');
-const {getAircallHubspotData, uploadFileToSlack}  = require('./util.js');
+const {getAircallHubspotData}  = require('./util.js');
+const {uploadFileToSlack}  = require('./slack.js');
 
 //create a server 
 const app = express();
@@ -28,11 +28,11 @@ app.post('/webhook', async (req, res) => {
         const data = await getAircallHubspotData(body); 
         
         if(data){                  
-          if(data.aircall_data.duration > 10){
+          if(data.aircall_data.duration > 120){
             console.log("Recording Above Two Minutes");
 
             try {
-              const res = uploadFileToSlack(data);
+              uploadFileToSlack(data);
             }catch(e){
               console.log(e);
             }
