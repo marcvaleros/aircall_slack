@@ -67,8 +67,6 @@ const findCompany = async (query) => {
     console.error('Error fetching data:', error);
     return null;
   }
-
-
 }
 
 const getAircallHubspotData = async (body) =>{
