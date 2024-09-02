@@ -9,7 +9,7 @@ var endpoint = 'crm/v3/objects/companies/search';
 
 
 
-const uploadFileToSlack = (data) => {      //returns true if the file is already uploaded
+const uploadFileToSlack = (data,channel_id) => {      //returns true if the file is already uploaded
   const url = data.aircall_data.recording;
   const companyId = data.hubspot_id;
   const companyName = data.hubspot_properties.name;
@@ -18,11 +18,11 @@ const uploadFileToSlack = (data) => {      //returns true if the file is already
   const phone = data.aircall_data.raw_digits;
   const duration = data.aircall_data.duration;
 
-  const res = getUploadURL(url, companyName, dot, user_name,phone,companyId, duration);
+  const res = getUploadURL(url, companyName, dot, user_name,phone,companyId, duration, channel_id);
   return res;
 }
 
-const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, duration) => {
+const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, duration, channel_id) => {
   try {
     // Fetch the file from the URL
     const response = await axios.get(url, {
@@ -66,7 +66,7 @@ const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, d
     
           if (uploadRes.status === 200) {
             console.log(uploadRes.data);
-            await completeUploadToSlack(slackData.file_id, companyName, dot, user_name, phone, companyId, duration);
+            await completeUploadToSlack(slackData.file_id, companyName, dot, user_name, phone, companyId, duration, channel_id);
             console.log('Success ');
     
           } else {
@@ -88,7 +88,7 @@ const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, d
   }
 } 
 
-async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone,companyId, duration) {
+async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone,companyId, duration, channel_id) {
   const payload = {
     files: [
       {
@@ -96,7 +96,7 @@ async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name
         title: `${aircall_user_name} - ${companyName} - ${dot}`,
       }
     ],
-    channel_id: process.env.SLACK_CHANNEL_ID,
+    channel_id: channel_id,
     initial_comment:
     `Team Member: ${aircall_user_name}\nCompany: ${companyName}.\nPhone: ${phone}\nDOT: ${dot}\nHubspot Link: ${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\nCall Length: ${convertSecsToMins(duration)}\n`
   };

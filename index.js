@@ -27,19 +27,34 @@ app.post('/webhook', async (req, res) => {
         //create an object that contains the aircall and hubspot data
         const data = await getAircallHubspotData(body); 
         
-        if(data){                  
-          if(data.aircall_data.duration > process.env.DURATION){
-            console.log("Recording Above Two Minutes");
+        console.log(JSON.stringify(data,null,1));
+        
+        if(data){
+          if(data.aircall_data.user.id === 1376762){
+            console.log("Data will be sent to another slack channel");
+            console.log(`The aircall user name is ${data.aircall_data.user.name}`);
 
             try {
-              uploadFileToSlack(data);
+              uploadFileToSlack(data, process.env.DCS_TRAINING_CHANNEL_ID);
             }catch(e){
               console.log(e);
             }
 
           }else{
-            console.log("Recording Below Two Minutes");
+            if(data.aircall_data.duration > process.env.DURATION){
+              console.log("Recording Above Two Minutes");
+  
+              try {
+                uploadFileToSlack(data, process.env.SLACK_CHANNEL_ID);
+              }catch(e){
+                console.log(e);
+              }
+  
+            }else{
+              console.log("Recording Below Two Minutes");
+            }
           }
+
         }else{
           console.log("Empty Data!");
         }
