@@ -17,6 +17,9 @@ app.use(express.json());
 
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  const TWS_Aircall = process.env.TWS_AIRCALL 
+  ? JSON.parse(process.env.TWS_AIRCALL) 
+  : [];
   console.log('Type of event:', body.event);
 
   switch(body.event){
@@ -30,7 +33,7 @@ app.post('/webhook', async (req, res) => {
         console.log(JSON.stringify(data,null,1));
         
         if(data && data.aircall_data.duration > process.env.DURATION){
-          if(data.aircall_data.user.id === 1376762){
+          if(TWS_Aircall.includes(data.aircall_data.user.id)){
             console.log("Data will be sent to another slack channel");
             console.log(`The aircall user name is ${data.aircall_data.user.name}`);
 
@@ -41,17 +44,11 @@ app.post('/webhook', async (req, res) => {
             }
 
           }else{
-            // if(data.aircall_data.duration > process.env.DURATION){
-            //   console.log("Recording Above Two Minutes");
               try {
                 uploadFileToSlack(data, process.env.SLACK_CHANNEL_ID);
               }catch(e){
                 console.log(e);
               }
-  
-            // }else{
-            //   console.log("Recording Below Two Minutes");
-            // }
           }
 
         }else{
