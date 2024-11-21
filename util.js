@@ -71,12 +71,14 @@ const findCompany = async (query) => {
 
 const getAircallHubspotData = async (body) =>{
   
+  console.log(`Aircal Body Data: ${JSON.stringify(body.data),null,2}`);
+  
   let aircall = body.data;
   let hubspot = await findCompany(aircall.raw_digits);
   
   let combinedData = {
-    hubspot_id: hubspot.results[0].id,
-    hubspot_properties: hubspot.results[0].properties,
+    hubspot_id: hubspot.results[0]?.id,
+    hubspot_properties: hubspot.results[0]?.properties,
     aircall_id: aircall.id,
     aircall_data: aircall,
   };
