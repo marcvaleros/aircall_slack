@@ -32,7 +32,7 @@ app.post('/webhook', async (req, res) => {
           console.log(`Uploading data to Slack channel. User: ${data.aircall_data.user.name}, Channel: ${channelId}`);
           await uploadFileToSlack(data, channelId);
         } else {
-          console.log(JSON.stringify(data),null,2);
+          console.log(JSON.stringify(data,null,2));
           console.log('Data is empty or does not meet duration criteria.');
         }
         break;
