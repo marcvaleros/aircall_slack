@@ -10,14 +10,22 @@ var endpoint = 'crm/v3/objects/companies/search';
 
 
 const uploadFileToSlack = (data,channel_id) => {      //returns true if the file is already uploaded
-  const url = data.aircall_data.recording;
-  const companyId = data.hubspot_id;
-  const companyName = data.hubspot_properties.name;
-  const dot = data.hubspot_properties.dot_number;
-  const user_name = data.aircall_data.user.name;
-  const phone = data.aircall_data.raw_digits;
-  const duration = data.aircall_data.duration;
+  const url = data.aircall_data?.recording;
+  const user_name = data.aircall_data?.user?.name;
+  const phone = data.aircall_data?.raw_digits;
+  const duration = data.aircall_data?.duration;
 
+  let companyId = null;
+  let companyName = null;
+  let dot = null;
+
+  //check if there's data for hubspot
+  if(data.hubspot_id && data.hubspot_properties){
+    companyId = data.hubspot_id;
+    companyName = data.hubspot_properties.name || null;
+    dot = data.hubspot_properties.dot_number || null;
+  }
+  
   const res = getUploadURL(url, companyName, dot, user_name,phone,companyId, duration, channel_id);
   return res;
 }
@@ -88,17 +96,58 @@ const getUploadURL = async (url, companyName, dot, user_name, phone,companyId, d
   }
 } 
 
-async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone,companyId, duration, channel_id) {
+// async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone,companyId, duration, channel_id) {
+//   const payload = {
+//     files: [
+//       {
+//         id: fileId,
+//         title: `${aircall_user_name} - ${companyName} - ${dot}`,
+//       }
+//     ],
+//     channel_id: channel_id,
+//     initial_comment:
+//     `Team Member: ${aircall_user_name}\nCompany: ${companyName}.\nPhone: ${phone}\nDOT: ${dot}\nHubspot Link: ${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\nCall Length: ${convertSecsToMins(duration)}\n`
+//   };
+
+//   try {
+//     const response = await axios.post('https://slack.com/api/files.completeUploadExternal', payload, {
+//       headers: {
+//         'Authorization': `Bearer ${process.env.SLACK_TOKEN}`,
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log(JSON.stringify(response.data, null, 5));
+//   } catch (error) {
+//     console.error('Complete Upload Failed!');
+//     console.error(error.message);
+//   }
+// }
+
+async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name, phone, companyId, duration, channel_id) {
+  // Construct the comment dynamically, skipping null or undefined values
+  let initialComment = [];
+  
+  if (aircall_user_name) initialComment.push(`Team Member: ${aircall_user_name}`);
+  if (companyName) initialComment.push(`Company: ${companyName}`);
+  if (phone) initialComment.push(`Phone: ${phone}`);
+  if (dot) initialComment.push(`DOT: ${dot}`);
+  if (companyId) initialComment.push(`Hubspot Link: https://app.hubspot.com/contacts/6919233/record/0-2/${companyId}`);
+  if (duration) initialComment.push(`Call Length: ${convertSecsToMins(duration)}`);
+
   const payload = {
     files: [
       {
         id: fileId,
-        title: `${aircall_user_name} - ${companyName} - ${dot}`,
+        title: [
+          aircall_user_name,
+          companyName,
+          dot
+        ].filter(Boolean).join(' - '),
       }
     ],
     channel_id: channel_id,
-    initial_comment:
-    `Team Member: ${aircall_user_name}\nCompany: ${companyName}.\nPhone: ${phone}\nDOT: ${dot}\nHubspot Link: ${'https://app.hubspot.com/contacts/6919233/record/0-2/'+ (companyId || 'N/A')}\nCall Length: ${convertSecsToMins(duration)}\n`
+    initial_comment: initialComment.join('\n') 
   };
 
   try {
@@ -115,6 +164,7 @@ async function completeUploadToSlack(fileId, companyName, dot, aircall_user_name
     console.error(error.message);
   }
 }
+
 
 function convertSecsToMins(seconds) {
   const minutes = Math.floor(seconds / 60);

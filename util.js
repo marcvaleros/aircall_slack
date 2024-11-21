@@ -69,24 +69,32 @@ const findCompany = async (query) => {
   }
 }
 
-const getAircallHubspotData = async (body) =>{
-  
-  console.log(`Aircal Body Data: ${JSON.stringify(body.data,null,2)}`);
-  
-  let aircall = body.data;
-  let hubspot = await findCompany(aircall.raw_digits);
-  
-  let combinedData = {
-    hubspot_id: hubspot.results[0]?.id,
-    hubspot_properties: hubspot.results[0]?.properties,
-    aircall_id: aircall.id,
-    aircall_data: aircall,
-  };
-  
-  // console.log("Combined Data: " + JSON.stringify(combinedData,null,2));
-  
-  return combinedData;
-}
+const getAircallHubspotData = async (body) => {
+  try {
+    const aircall = body.data;
+
+    // Validate Aircall data presence
+    if (!aircall || !aircall.raw_digits) {
+      throw new Error('Invalid Aircall data or missing raw_digits.');
+    }
+
+    // Retrieve HubSpot data based on Aircall raw_digits
+    const hubspot = await findCompany(aircall.raw_digits);
+
+    // Construct the combined data object
+    const combinedData = {
+      hubspot_id: hubspot?.results?.[0]?.id || null,
+      hubspot_properties: hubspot?.results?.[0]?.properties || null,
+      aircall_id: aircall.id,
+      aircall_data: aircall,
+    };
+
+    return combinedData;
+  } catch (error) {
+    console.error('Error in getAircallHubspotData:', error.message);
+    throw error; 
+  }
+};
 
 const formatPhoneNumber = (phoneNumber) => {
   // Define a regular expression to match the phone number
