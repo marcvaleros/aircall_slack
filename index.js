@@ -24,16 +24,16 @@ app.post('/webhook', async (req, res) => {
       case 'call.ended':
         console.log('Handling "call.ended" event...');
         const data = await getAircallHubspotData(body);
-
-        if (data && data.aircall_data.duration > process.env.DURATION) {
+        console.log(`This is the data ${JSON.stringify(data,null,2)}`);
+        
+        if (data && data.aircall_data.duration >= process.env.DURATION) {
           const isTwsUser = TWS_Aircall.includes(data.aircall_data.user.id);
           const channelId = isTwsUser ? process.env.DCS_TRAINING_CHANNEL_ID : process.env.SLACK_CHANNEL_ID;
-
+          
           console.log(`Uploading data to Slack channel. User: ${data.aircall_data.user.name}, Channel: ${channelId}`);
           await uploadFileToSlack(data, channelId);
         } else {
-          console.log(JSON.stringify(data,null,2));
-          console.log('Data is empty or does not meet duration criteria.');
+          console.log(`Data is empty or does not meet duration criteria. Duration: ${data.aircall_data.duration} \n Data: ${JSON.stringify(data,null,2)}`);
         }
         break;
 
