@@ -51,7 +51,7 @@ app.use(express.json());
 
 app.post('/webhook', async (req, res) => {
   const body = req.body;
-  const TWS_Aircall = [1452638, 1452635, 1452641, 1452620, 1359392];
+  const TWS_Aircall = [1359392];
   console.log('Type of event:', body.event);
 
   switch(body.event){
